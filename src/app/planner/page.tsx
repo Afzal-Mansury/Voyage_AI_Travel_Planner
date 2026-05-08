@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, MapPin, Calendar, IndianRupee, Heart, Backpack } from "lucide-react";
+import { generateAIItinerary } from "@/app/actions";
 import { Suspense } from "react";
 
 // Popular Indian destinations for quick selection
@@ -51,22 +52,39 @@ function PlannerContent() {
     return () => clearInterval(interval);
   }, [isGenerating]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsGenerating(true);
     setLoadingStep(0);
-    setTimeout(() => {
-      // Pass all form data as URL params so the trip page can render correctly
-      const params = new URLSearchParams({
-        destination: formData.destination,
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        budget: formData.budget,
-        interests: formData.interests,
-        style: formData.style,
-      });
-      router.push(`/trip/new?${params.toString()}`);
-    }, 4200);
+
+    const minWait = new Promise(resolve => setTimeout(resolve, 4200));
+    
+    try {
+      const [aiResult] = await Promise.all([
+        generateAIItinerary(formData),
+        minWait
+      ]);
+
+      if (aiResult) {
+        sessionStorage.setItem("yatraverse_ai_trip", aiResult);
+      } else {
+        sessionStorage.removeItem("yatraverse_ai_trip"); // Use fallback
+      }
+    } catch (e) {
+      console.error(e);
+      sessionStorage.removeItem("yatraverse_ai_trip");
+    }
+
+    // Pass form data to URL
+    const params = new URLSearchParams({
+      destination: formData.destination,
+      startDate: formData.startDate,
+      endDate: formData.endDate,
+      budget: formData.budget,
+      interests: formData.interests,
+      style: formData.style,
+    });
+    router.push(`/trip/new?${params.toString()}`);
   };
 
   return (

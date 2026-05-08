@@ -1,8 +1,8 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, MapPin, Coffee, Sun, Camera, CloudSun, Utensils, Train, Plane, Shield } from "lucide-react";
+import { ArrowLeft, MapPin, Coffee, Sun, Camera, CloudSun, Utensils, Train, Plane, Shield, Share, Download } from "lucide-react";
 import Link from "next/link";
 import ExpenseEstimator from "@/components/ExpenseEstimator";
 import InteractiveMap from "@/components/InteractiveMap";
@@ -209,14 +209,47 @@ function TripContent() {
   // Match destination to data
   const destKey = destParam.toLowerCase().replace(/,.*/, "").trim();
   const destInfo = INDIA_DESTINATIONS.find(d => d.name.toLowerCase() === destKey) || INDIA_DESTINATIONS[0];
-  const data = DESTINATION_DATA[destKey] || getGenericData(destParam);
+
+  const [data, setData] = useState<any>(null);
+
+  useEffect(() => {
+    const aiStr = sessionStorage.getItem("yatraverse_ai_trip");
+    if (aiStr) {
+      try {
+        const parsed = JSON.parse(aiStr);
+        const iconMap: Record<string, any> = { Coffee, Camera, Sun, CloudSun, Utensils, MapPin };
+        
+        parsed.days.forEach((day: any) => {
+          day.events.forEach((event: any) => {
+            event.icon = iconMap[event.icon] || MapPin;
+          });
+        });
+        
+        parsed.emoji = destInfo?.emoji || "🗺️";
+        setData(parsed);
+        return;
+      } catch (e) {
+        console.error("AI Parse error", e);
+      }
+    }
+    setData(DESTINATION_DATA[destKey] || getGenericData(destParam));
+  }, [destKey, destParam, destInfo]);
+
+  if (!data) return <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center"><div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div></div>;
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] pt-24 pb-12 px-6">
       <div className="container mx-auto max-w-7xl">
-        <Link href="/dashboard" className="text-gray-400 hover:text-white flex items-center gap-2 mb-6 w-fit transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Back to My Trips
-        </Link>
+        <div className="flex justify-between items-center mb-6">
+          <Link href="/dashboard" className="text-gray-400 hover:text-white flex items-center gap-2 w-fit transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Back to My Trips
+          </Link>
+          <div className="flex gap-3">
+            <button onClick={() => window.print()} className="glass px-4 py-2 rounded-xl text-white text-sm font-medium flex items-center gap-2 hover:bg-white/10 transition-colors">
+              <Download className="w-4 h-4 text-orange-400" /> Save PDF
+            </button>
+          </div>
+        </div>
 
         {/* Hero Banner */}
         <div className="relative h-64 md:h-80 rounded-[2.5rem] overflow-hidden mb-10 group">

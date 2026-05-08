@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, X, Send, Sparkles } from "lucide-react";
+import { askGeminiAssistant } from "@/app/actions";
 
 const SUGGESTED_QUESTIONS = [
   "Best time to visit Kashmir? 🏔️",
@@ -26,23 +27,14 @@ export default function ChatWidget() {
     setInput("");
     setIsLoading(true);
 
-    // Mock responses based on keyword matching for demo
-    setTimeout(() => {
-      let reply = "That's a great question! I can help you plan an incredible trip. Could you share your budget range in ₹ and how many days you have?";
-      
-      if (userMsg.toLowerCase().includes("kashmir")) {
-        reply = "Kashmir is best visited April–June for flowers, or September–November for autumn colors. Budget around ₹8,000–₹15,000/day. Must-do: Shikara ride on Dal Lake and Gulmarg Gondola! 🏔️";
-      } else if (userMsg.toLowerCase().includes("goa")) {
-        reply = "Goa is perfect from November to February. Budget ₹3,000–₹8,000/day. Head to South Goa (Palolem, Agonda) for a quieter experience. 🏖️";
-      } else if (userMsg.toLowerCase().includes("train") || userMsg.toLowerCase().includes("varanasi")) {
-        reply = "The Shiv Ganga Express (12559) from Delhi to Varanasi takes ~12 hours and costs ₹350–₹2,400 depending on class. Book on IRCTC.co.in 🚂";
-      } else if (userMsg.toLowerCase().includes("budget") || userMsg.toLowerCase().includes("cost")) {
-        reply = "A mid-range India trip costs ₹4,000–₹8,000/day including hotel, food, and local transport. Budget backpackers can do it for ₹1,500/day! Want a detailed breakdown? 💰";
-      }
-
-      setMessages(prev => [...prev, { role: "assistant", content: reply }]);
+    try {
+      const reply = await askGeminiAssistant(messages, userMsg);
+      setMessages(prev => [...prev, { role: "assistant", content: reply || "Sorry, I am offline right now." }]);
+    } catch (e) {
+      setMessages(prev => [...prev, { role: "assistant", content: "Oops! Connection error. Please try again." }]);
+    } finally {
       setIsLoading(false);
-    }, 1400);
+    }
   };
 
   return (
