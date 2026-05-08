@@ -1,28 +1,46 @@
 "use client";
 
-import { useEffect, useState } from "react";
+// Uses Google Maps Embed API — free, no API key required for basic embeds
+interface InteractiveMapProps {
+  destination?: string;
+}
 
-// For the hackathon, since we might not have a real valid API key immediately,
-// we will show a beautiful placeholder map UI if the script fails or as a skeleton.
-export default function InteractiveMap() {
+// Per-destination coordinates for the embed
+const DESTINATION_COORDS: Record<string, { q: string; label: string }> = {
+  kashmir: { q: "Dal+Lake,Srinagar,Jammu+and+Kashmir,India", label: "Dal Lake, Srinagar" },
+  goa: { q: "Baga+Beach,Goa,India", label: "Baga Beach, Goa" },
+  kerala: { q: "Alleppey+Backwaters,Kerala,India", label: "Alleppey Backwaters, Kerala" },
+  jaipur: { q: "Amber+Fort,Jaipur,Rajasthan,India", label: "Amber Fort, Jaipur" },
+  ladakh: { q: "Pangong+Lake,Ladakh,India", label: "Pangong Tso, Ladakh" },
+  varanasi: { q: "Dashashwamedh+Ghat,Varanasi,India", label: "Dashashwamedh Ghat, Varanasi" },
+  meghalaya: { q: "Living+Root+Bridge,Cherrapunji,Meghalaya,India", label: "Root Bridges, Meghalaya" },
+  andaman: { q: "Radhanagar+Beach,Havelock+Island,Andaman,India", label: "Radhanagar Beach, Andaman" },
+  hyderabad: { q: "Charminar,Hyderabad,Telangana,India", label: "Charminar, Hyderabad" },
+};
+
+export default function InteractiveMap({ destination = "Kashmir" }: InteractiveMapProps) {
+  const key = destination.toLowerCase().replace(/,.*/, "").trim();
+  const coords = DESTINATION_COORDS[key] || { q: `${destination.replace(/ /g, "+")},India`, label: destination };
+
+  const embedUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&q=${coords.q}&zoom=11`;
+
   return (
-    <div className="w-full h-full min-h-[400px] rounded-[2rem] overflow-hidden relative glass-dark border border-white/10 group">
-      {/* Mock Map Background */}
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=2074&auto=format&fit=crop')] bg-cover bg-center opacity-50 grayscale contrast-125 group-hover:grayscale-0 transition-all duration-1000"></div>
-      
-      {/* Overlays */}
-      <div className="absolute inset-0 bg-blue-900/20 mix-blend-overlay"></div>
-      
-      {/* Mock Pins */}
-      <div className="absolute top-1/3 left-1/3 w-4 h-4 bg-blue-500 rounded-full shadow-[0_0_15px_#3b82f6] animate-pulse"></div>
-      <div className="absolute top-1/2 left-1/2 w-4 h-4 bg-purple-500 rounded-full shadow-[0_0_15px_#a855f7] animate-pulse delay-75"></div>
-      <div className="absolute bottom-1/3 right-1/3 w-4 h-4 bg-pink-500 rounded-full shadow-[0_0_15px_#ec4899] animate-pulse delay-150"></div>
-      
-      <div className="absolute bottom-4 left-4 right-4 glass px-4 py-3 rounded-xl flex items-center justify-between text-sm backdrop-blur-md">
+    <div className="w-full rounded-[2rem] overflow-hidden relative glass-dark border border-white/10" style={{ height: 380 }}>
+      <iframe
+        title={`Map of ${coords.label}`}
+        src={embedUrl}
+        className="w-full h-full border-0"
+        allowFullScreen
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+      />
+      {/* Label overlay */}
+      <div className="absolute bottom-4 left-4 right-4 glass px-4 py-2.5 rounded-xl flex items-center justify-between text-sm pointer-events-none">
         <span className="text-white font-medium flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-green-400"></span> Live Map Active
+          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+          {coords.label}
         </span>
-        <button className="text-blue-400 hover:text-white transition">View full map</button>
+        <span className="text-orange-400 text-xs font-semibold">📍 Live Map</span>
       </div>
     </div>
   );

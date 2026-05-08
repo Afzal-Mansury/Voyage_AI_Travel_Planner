@@ -26,9 +26,14 @@ function PlannerContent() {
   const searchParams = useSearchParams();
   const [isGenerating, setIsGenerating] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
+  // Get today & a week later as defaults
+  const today = new Date().toISOString().split("T")[0];
+  const weekLater = new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0];
+
   const [formData, setFormData] = useState({
     destination: searchParams.get("destination") || "",
-    dates: "",
+    startDate: today,
+    endDate: weekLater,
     budget: "Medium (₹5,000–₹12,000/day)",
     interests: "",
     style: "Balanced"
@@ -51,7 +56,16 @@ function PlannerContent() {
     setIsGenerating(true);
     setLoadingStep(0);
     setTimeout(() => {
-      router.push("/trip/new");
+      // Pass all form data as URL params so the trip page can render correctly
+      const params = new URLSearchParams({
+        destination: formData.destination,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        budget: formData.budget,
+        interests: formData.interests,
+        style: formData.style,
+      });
+      router.push(`/trip/new?${params.toString()}`);
     }, 4200);
   };
 
@@ -155,17 +169,35 @@ function PlannerContent() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
+              {/* Date pickers — start and end date */}
+              <div className="space-y-2 md:col-span-2">
                 <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-orange-400" /> Travel Dates
                 </label>
-                <input 
-                  type="text" 
-                  placeholder="e.g. Nov 15 – Nov 22" 
-                  className="w-full bg-black/50 text-white rounded-xl px-4 py-3 outline-none border border-white/10 focus:border-orange-500 transition-colors"
-                  value={formData.dates}
-                  onChange={e => setFormData({...formData, dates: e.target.value})}
-                />
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Start Date</p>
+                    <input
+                      type="date"
+                      required
+                      min={today}
+                      className="w-full bg-black/50 text-white rounded-xl px-4 py-3 outline-none border border-white/10 focus:border-orange-500 transition-colors [color-scheme:dark]"
+                      value={formData.startDate}
+                      onChange={e => setFormData({...formData, startDate: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">End Date</p>
+                    <input
+                      type="date"
+                      required
+                      min={formData.startDate || today}
+                      className="w-full bg-black/50 text-white rounded-xl px-4 py-3 outline-none border border-white/10 focus:border-orange-500 transition-colors [color-scheme:dark]"
+                      value={formData.endDate}
+                      onChange={e => setFormData({...formData, endDate: e.target.value})}
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -240,9 +272,11 @@ function PlannerContent() {
 
 export default function AIPlanner() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
-      <div className="text-white text-xl">Loading planner...</div>
-    </Suspense>}>
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+        <div className="text-white text-xl">Loading planner...</div>
+      </div>
+    }>
       <PlannerContent />
     </Suspense>
   );

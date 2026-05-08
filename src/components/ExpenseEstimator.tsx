@@ -1,6 +1,6 @@
 "use client";
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from "recharts";
+import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, Legend } from "recharts";
 
 // India-specific INR budget breakdown
 const data = [
@@ -23,30 +23,28 @@ export default function ExpenseEstimator() {
       </div>
       <p className="text-xs text-gray-400 mb-5">For 7 days · Medium budget · Per person</p>
       
-      <div className="h-56 w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              innerRadius={55}
-              outerRadius={75}
-              paddingAngle={4}
-              dataKey="value"
-            >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-            <RechartsTooltip
-              formatter={(value: number) => [`₹${value.toLocaleString("en-IN")}`, ""]}
-              contentStyle={{ backgroundColor: "#0f172a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "0.75rem", color: "#fff" }}
-              itemStyle={{ color: "#fff" }}
-            />
-            <Legend verticalAlign="bottom" height={36} />
-          </PieChart>
-        </ResponsiveContainer>
+      <div className="w-full flex justify-center" style={{ height: 224 }}>
+        <PieChart width={280} height={224}>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="45%"
+            innerRadius={55}
+            outerRadius={75}
+            paddingAngle={4}
+            dataKey="value"
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.color} />
+            ))}
+          </Pie>
+          <RechartsTooltip
+            formatter={(value) => [`₹${Number(value).toLocaleString("en-IN")}`, ""]}
+            contentStyle={{ backgroundColor: "#0f172a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "0.75rem", color: "#fff" }}
+            itemStyle={{ color: "#fff" }}
+          />
+          <Legend verticalAlign="bottom" height={36} />
+        </PieChart>
       </div>
 
       {/* Breakdown list */}
