@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Plane, Compass, Map as MapIcon, User } from "lucide-react";
+import { Compass, Map as MapIcon, User, Globe } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Navbar() {
@@ -12,14 +12,22 @@ export default function Navbar() {
       className="fixed top-0 w-full z-50 glass-dark border-b border-white/10"
     >
       <div className="container mx-auto px-6 h-20 flex items-center justify-between">
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center">
-            <Plane className="text-white w-5 h-5" />
+        {/* Logo - YatraVerse AI */}
+        <Link href="/" className="flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl"
+            style={{ background: "linear-gradient(135deg, #FF9933, #c2410c)" }}>
+            🇮🇳
           </div>
-          <span className="text-2xl font-bold text-white tracking-tight">VoyageAI</span>
+          <div className="flex flex-col leading-none">
+            <span className="text-xl font-extrabold text-white tracking-tight">YatraVerse</span>
+            <span className="text-[10px] font-semibold tracking-widest" style={{ color: "#FF9933" }}>AI · DISCOVER INDIA</span>
+          </div>
         </Link>
         
         <nav className="hidden md:flex items-center space-x-8">
+          <Link href="/destinations" className="text-sm font-medium text-gray-300 hover:text-white transition-colors flex items-center gap-2">
+            <Globe className="w-4 h-4" /> Destinations
+          </Link>
           <Link href="/planner" className="text-sm font-medium text-gray-300 hover:text-white transition-colors flex items-center gap-2">
             <Compass className="w-4 h-4" /> AI Planner
           </Link>
@@ -34,9 +42,10 @@ export default function Navbar() {
           </Link>
           <Link 
             href="/planner" 
-            className="px-5 py-2.5 rounded-full bg-white text-black font-semibold text-sm hover:bg-gray-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)]"
+            className="px-5 py-2.5 rounded-full font-semibold text-sm text-black transition-all glow-saffron"
+            style={{ background: "linear-gradient(135deg, #FF9933, #f97316)" }}
           >
-            Start Planning
+            Plan My Yatra ✨
           </Link>
         </div>
       </div>
